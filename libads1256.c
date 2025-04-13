@@ -61,6 +61,20 @@
  
      return 0;
  }
+
+/**
+ * convert_to_signed_24bit - Convert 24-bit data to signed int
+ * @result: A unsigned char data arrays.
+ */
+int32_t convert_to_signed_24bit(const unsigned char *result)
+{
+    int32_t value = (result[0] << 16) | (result[1] << 8) | result[2];
+    if (value & 0x800000)
+    {
+        value |= 0xFF000000;
+    }
+    return value;
+}
  
  /**
   * SPISetup - Set up a spi device
@@ -103,7 +117,7 @@
  
  /**
   * ads125xSetMUX:
-  * @fd: The ads125x_dev SPI dev descriptors.
+ * @dev: The ads125x dev info struct pointer.
   * @psel: Postive Input Channel (AIN_P) select.
   * @nsel: Negative Input Channel (AIN_N) select.
   */
@@ -134,7 +148,7 @@
  
  /**
   * ads125xSetDRATE - set ads125x_dev A/D data rate
-  * @fd: The ads125x_dev SPI dev descriptors.
+ * @dev: The ads125x dev info struct pointer.
   * @dr: Target data rates, see ADS1256_DR_* and the datasheet.
   */
  void ads125xSetDRATE(ads125x_dev *dev, const uint8_t dr)
@@ -165,12 +179,14 @@
  
  /**
   * ads125xSendCMD - Send a command to ADS1256
-  * @fd: The ads125x_dev SPI dev descriptors.
+ * @dev: The ads125x dev info struct pointer.
   * @cmd: A command. see ads1256reg.h .
   *
   * This function is intended for sending single-byte commands only,
   * facilitating operations such as wake-up, calibration, and reset.
   * Commands are macro-defined with the `ADS1256_CMD_` prefix.
+ *
+ * **WARN**: DO NOT USE THIS FUNCTION SEND RDATA/RRED/WREG COMMAND.
   */
  void ads125xSendCMD(ads125x_dev *dev, const uint8_t cmd)
  {
@@ -197,7 +213,7 @@
  
  /**
   * ads125xRREG - read some data from registers
-  * @fd: The ads125x_dev SPI dev descriptors.
+ * @dev: The ads125x dev info struct pointer.
   * @regaddr: The target read register address.
   * @data: Used to store the read data.
   * @len: Read data length, not need to -1
@@ -246,7 +262,7 @@
  
  /**
   * ads125xWREG - Write some data to registers
-  * @fd: The ads125x_dev SPI dev descriptors.
+ * @dev: The ads125x dev info struct pointer.
   * @regaddr: The target write register address.
   * @data: Used to store the data to be written.
   * @len: Write data length, not need to -1

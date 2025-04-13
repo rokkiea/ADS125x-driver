@@ -49,6 +49,8 @@ void ads125xSetDRATE(ads125x_dev *dev, const uint8_t dr);
 void ads125xSendCMD(ads125x_dev *dev, const uint8_t cmd);
 void ads125xRREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const uint8_t len);
 void ads125xWREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const uint8_t len);
+void ads125xRDATA(ads125x_dev *dev, uint8_t *data);
+void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times);
 // void ads125xSELFCAL(ads125x_dev *dev);
 // void ads125xSELFOCAL(ads125x_dev *dev);
 // void ads125xSELFGCAL(ads125x_dev *dev);
