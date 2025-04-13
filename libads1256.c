@@ -127,7 +127,7 @@
      spi.bits_per_word = dev->spi_bit_p_word;
      spi.cs_change = 0;
  
-     if ((ret = ioctl(&(dev->fd), SPI_IOC_MESSAGE(1), &spi)) < 0)
+     if ((ret = ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi)) < 0)
          FailurePrint("Set Data-Rate error: %s\n", strerror(errno));
      return;
  }
@@ -158,7 +158,7 @@
      spi.bits_per_word = dev->spi_bit_p_word;
      spi.cs_change = 0;
  
-     if (ioctl(&(dev->fd), SPI_IOC_MESSAGE(1), &spi) < 0)
+     if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
          FailurePrint("Set Data-Rate error: %s\n", strerror(errno));
      return;
  }
@@ -190,7 +190,7 @@
      spi.bits_per_word = dev->spi_bit_p_word;
      spi.cs_change = 0;
  
-     if (ioctl(&(dev->fd), SPI_IOC_MESSAGE(1), &spi) < 0)
+     if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
          FailurePrint("Send command error: %s\n", strerror(errno));
      return;
  }
@@ -235,7 +235,7 @@
      spi[1].speed_hz = dev->spi_speed;
      spi[1].bits_per_word = dev->spi_bit_p_word;
      spi[1].cs_change = 0;
-     if (ioctl(&(dev->fd), SPI_IOC_MESSAGE(2), &spi) < 0)
+     if (ioctl(dev->fd, SPI_IOC_MESSAGE(2), &spi) < 0)
      {
          FailurePrint("WREG err: %s\n", strerror(errno));
          free(spiTxData);
@@ -277,7 +277,7 @@
      spi.bits_per_word = dev->spi_bit_p_word;
      spi.cs_change = 0;
  
-     if (ioctl(&(dev->fd), SPI_IOC_MESSAGE(1), &spi) < 0)
+     if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
      {
          FailurePrint("WREG err: %s\n", strerror(errno));
          free(spiTxData);

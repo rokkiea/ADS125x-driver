@@ -34,13 +34,4 @@
  #define ADS125x_SPI_MODE SPI_MODE_1
  #define ADS125x_SPI_BIT_P_WORD 8
  
- typedef struct
- {
-     char *name;
-     int fd;
-     uint8_t spi_mode;
-     uint8_t spi_bit_p_word;
-     uint8_t spi_speed;
- } ads125x_dev;
  
- int SPIOpen(int channel, int port, int speed, int mode);

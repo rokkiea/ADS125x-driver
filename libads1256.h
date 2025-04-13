@@ -32,6 +32,15 @@
 
 #include <stdint.h>
 
+typedef struct ads125x_dev_struct
+{
+    char *name;
+    int fd;
+    uint8_t spi_mode;
+    uint8_t spi_bit_p_word;
+    int spi_speed;
+} ads125x_dev;
+
 int FailurePrint(const char *message, ...);
 int SPISetup(const int channel, const int port, const int speed, const int spiBPW, const int mode);
 int ads1256Setup(ads125x_dev *dev, int spiChannel, int spiPort);

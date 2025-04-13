@@ -47,7 +47,6 @@
 #define ADS1256_REG_ADDR_FSC2               0x0A
 
 // STATUS register
-
 #define ADS1256_STATUS_ORDER_MSB            0x00    // default
 #define ADS1256_STATUS_ORDER_LSB            0x04
 #define ADS1256_STATUS_ACAL_ON              0x00
