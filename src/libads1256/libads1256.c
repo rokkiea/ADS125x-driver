@@ -45,7 +45,6 @@
 #include <unistd.h>
 
 #include "libads1256reg.h"
-#include "ads1256.h"
 #include "libads1256.h"
 
 int FailurePrint(const char *message, ...)
