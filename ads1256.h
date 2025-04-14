@@ -30,8 +30,8 @@
  *  Datasheet: https://www.ti.com/lit/gpn/ads1256
  */
 
- #define ADS125x_SPI_SPEED 1000000
+ #define ADS125x_SPI_SPEED 1920000
  #define ADS125x_SPI_MODE SPI_MODE_1
  #define ADS125x_SPI_BIT_P_WORD 8
- 
- 
+ #define ADS125x_DRDY_CHIP "gpiochip1"
+ #define ADS125x_DRDY_LINE 3

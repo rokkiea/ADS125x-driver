@@ -31,6 +31,7 @@
  */
 
 #include <stdint.h>
+#include <gpiod.h>
 
 typedef struct ads125x_dev_struct
 {
@@ -39,10 +40,19 @@ typedef struct ads125x_dev_struct
     uint8_t spi_mode;
     uint8_t spi_bit_p_word;
     int spi_speed;
+
+    struct gpiod_chip *ping_DRDY_chip;
+    struct gpiod_line *pin_DRDY_line;
 } ads125x_dev;
 
 int FailurePrint(const char *message, ...);
+int32_t convert_to_signed_24bit(const unsigned char *result);
+int ads125xGetGPIOLine(ads125x_dev *dev, char *chip, int line);
+int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line);
+void ads125xCloseDRDY(ads125x_dev *dev);
+void ads1256waitDRDY(struct gpiod_line *line);
 int SPISetup(const int channel, const int port, const int speed, const int spiBPW, const int mode);
+int SPIRelease(const int fd);
 int ads1256Setup(ads125x_dev *dev, int spiChannel, int spiPort);
 void ads125xSetMUX(ads125x_dev *dev, const uint8_t psel, const uint8_t nsel);
 void ads125xSetDRATE(ads125x_dev *dev, const uint8_t dr);
