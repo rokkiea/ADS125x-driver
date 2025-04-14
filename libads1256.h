@@ -33,7 +33,7 @@
 #include <stdint.h>
 #include <gpiod.h>
 
-#define ADS1256_DATA_LEN_BYTE 3
+#define ADS125x_DATA_LEN_BYTE 3
 
 typedef struct ads125x_dev_struct
 {
@@ -56,10 +56,10 @@ int ads125xGetGPIOLine(char *chip, int line, struct gpiod_chip **cp, struct gpio
 int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line);
 int ads125xOpenPDWN(ads125x_dev *dev, char *chip, int line, uint8_t init_status);
 void ads125xCloseDRDY(ads125x_dev *dev);
-void ads1256waitDRDY(struct gpiod_line *line);
+void ads125xwaitDRDY(struct gpiod_line *line);
 int SPISetup(const int channel, const int port, const int speed, const int spiBPW, const int mode);
 int SPIRelease(const int fd);
-int ads1256Setup(ads125x_dev *dev, int spiChannel, int spiPort);
+int ads125xSetup(ads125x_dev *dev, int spiChannel, int spiPort);
 void ads125xSetMUX(ads125x_dev *dev, const uint8_t psel, const uint8_t nsel);
 void ads125xSetDRATE(ads125x_dev *dev, const uint8_t dr);
 void ads125xSendCMD(ads125x_dev *dev, const uint8_t cmd);
@@ -68,7 +68,6 @@ void ads125xWREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const u
 void ads125xRDATA(ads125x_dev *dev, uint8_t *data);
 void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times);
 int ads125xSetPDWN(ads125x_dev *dev, uint8_t status);
-
 // void ads125xSELFCAL(ads125x_dev *dev);
 // void ads125xSELFOCAL(ads125x_dev *dev);
 // void ads125xSELFGCAL(ads125x_dev *dev);
