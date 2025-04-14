@@ -123,7 +123,7 @@ int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line)
         fprintf(stderr, "Cannot open ADS1256 DRDY.\n");
         return 1;
     }
-    if (!gpiod_line_request_input(dev->pin_DRDY_line, "gpio_polling"))
+    if ((gpiod_line_request_input(dev->pin_DRDY_line, "gpio_polling")) < 0)
     {
         fprintf(stderr, "Cannot set DRDY to input mode.\n");
         return 2;
@@ -136,9 +136,9 @@ int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line)
  */
 void ads125xCloseDRDY(ads125x_dev *dev)
 {
-    gpiod_line_release(dev->pin_DRDY_line);
-    dev->pin_DRDY_line = NULL;
+    // gpiod_line_release(dev->pin_DRDY_line);
     gpiod_chip_close(dev->ping_DRDY_chip);
+    dev->pin_DRDY_line = NULL;
     dev->ping_DRDY_chip = NULL;
     return;
 }
@@ -339,7 +339,7 @@ void ads125xRREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const u
     spi[1].tx_buf = (unsigned long)spiTxData + 2;
     spi[1].rx_buf = (unsigned long)data;
     spi[1].len = (len - 1);
-    spi[1].delay_usecs = 10;
+    spi[1].delay_usecs = 0;
     spi[1].speed_hz = dev->spi_speed;
     spi[1].bits_per_word = dev->spi_bit_p_word;
     spi[1].cs_change = 0;
@@ -396,5 +396,65 @@ void ads125xWREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const u
         free(spiTxData);
     }
     free(spiTxData);
+    return;
+}
+
+/**
+ * ads125xRDATA - ADS125x one-shot read data
+ * @dev: The ads125x dev info struct pointer.
+ * @data: Used to store the data to be written, please give a 3-Bytes space.
+ */
+void ads125xRDATA(ads125x_dev *dev, uint8_t *data)
+{
+    ads125xSendCMD(dev, ADS1256_CMD_RDATA);
+}
+
+/**
+ * ads125xRDATAC - ADS125x continuous read data
+ * @dev: The ads125x dev info struct pointer.
+ * @data: Used to store the data to be written, please give times*3 space.
+ * @times: Read times
+ */
+void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times)
+{
+    // ads125xSendCMD(dev, ADS1256_CMD_RDATAC);
+    uint8_t spiTxData[2] = {0};
+    int ret, i, gpio_to, g;
+    struct spi_ioc_transfer spi[2];
+
+    memset(&spi, 0, sizeof(spi));
+
+    spiTxData[0] = ADS1256_CMD_RDATAC;
+    spi[0].tx_buf = (unsigned long)&spiTxData;
+    spi[0].rx_buf = 0;
+    spi[0].len = 1;
+    spi[0].delay_usecs = 0;
+    spi[0].speed_hz = dev->spi_speed;
+    spi[0].bits_per_word = dev->spi_bit_p_word;
+    spi[0].cs_change = 0;
+
+    spi[1].tx_buf = 0;
+    spi[1].rx_buf = (unsigned long)data;
+    spi[1].len = 3;
+    spi[1].delay_usecs = 0;
+    spi[1].speed_hz = dev->spi_speed;
+    spi[1].bits_per_word = dev->spi_bit_p_word;
+    spi[1].cs_change = 0;
+
+    ads1256waitDRDY(dev->pin_DRDY_line);
+    if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
+        FailurePrint("Send command error: %s\n", strerror(errno));
+    for (i = 0; i < times; ++i)
+    {
+        spi[1].rx_buf = (unsigned long)(data + 3 * i);
+        ads1256waitDRDY(dev->pin_DRDY_line);
+        // while ((g = gpiod_line_get_value(dev->pin_DRDY_line)))
+        //     if (g == -1)
+        //         exit(1);
+        if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi[1]) < 0)
+            FailurePrint("RDATAC error: %s\n", strerror(errno));
+        // printf("time: %d\n", i);
+    }
+    ads125xSendCMD(dev, ADS1256_CMD_SDATAC);
     return;
 }

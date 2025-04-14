@@ -33,6 +33,8 @@
 #include <stdint.h>
 #include <gpiod.h>
 
+#define ADS1256_DATA_LEN_BYTE 3
+
 typedef struct ads125x_dev_struct
 {
     char *name;
