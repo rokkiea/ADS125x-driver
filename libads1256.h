@@ -1,15 +1,14 @@
 /**
- * libads1256.h - TI ads125x_dev driver library
+ * libads1256.h - TI ADS1255/ADS1256 driver library
  *
- *	Extend wiringPi with the ads125x_dev SPI 24-Bit ADC
+ *	Driver for the ADS1256 SPI 24-Bit ADC
  *	Copyright (c) 2025, Guo Ruijing (rokkiea)
  *
- * This program has only been tested on the Orange Pi 5 Pro and is not
- * guaranteed to function correctly on any other boards.
+ * This program has been tested solely on the Orange Pi 5 Pro with the
+ * ADS1256. It should theoretically work with the ADS1255 as well.
+ * However, its functionality on any other board is not guaranteed.
  *
  ***********************************************************************
- * This file exists as a supplement to WiringPi.
- *  https://projects.drogon.net/raspberry-pi/wiringpi/
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,9 +24,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ***********************************************************************
- * For details of ads125x_dev, see:
- *  TI ads125x_dev: https://www.ti.com/product/ads125x_dev
+ * For details of ADS125x, see:
+ *  TI ADS125x: https://www.ti.com/product/ADS1256
+ *              https://www.ti.com/product/ADS1255
  *  Datasheet: https://www.ti.com/lit/gpn/ads1256
+ *             https://www.ti.com/lit/gpn/ads1255
  */
 
 #include <stdint.h>
