@@ -71,9 +71,7 @@ int32_t convert_to_signed_24bit(const unsigned char *result)
 {
     int32_t value = (result[0] << 16) | (result[1] << 8) | result[2];
     if (value & 0x800000)
-    {
         value |= 0xFF000000;
-    }
     return value;
 }
 
@@ -231,7 +229,6 @@ int SPISetup(const int channel, const int port, const int speed, const int spiBP
 
 int ads125xSetup(ads125x_dev *dev, int spiChannel, int spiPort)
 {
-    struct wiringPiNodeStruct *node;
     int fd;
 
     fd = SPISetup(0, 0, dev->spi_speed, dev->spi_bit_p_word, dev->spi_mode);
