@@ -464,28 +464,19 @@ void ads125xRDATA(ads125x_dev *dev, uint8_t *data)
 void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times)
 {
     // ads125xSendCMD(dev, ADS1256_CMD_RDATAC);
-    uint8_t spiTxData[2] = {0};
-    int ret, i, gpio_to, g;
-    struct spi_ioc_transfer spi[2];
+    // uint8_t spiTxData[2] = {0};
+    int i, gpio_to;
+    // int g;
+    struct spi_ioc_transfer spi;
 
     memset(&spi, 0, sizeof(spi));
-
-    spiTxData[0] = ADS1256_CMD_RDATAC;
-    spi[0].tx_buf = (unsigned long)&spiTxData;
-    spi[0].rx_buf = 0;
-    spi[0].len = 1;
-    spi[0].delay_usecs = 0;
-    spi[0].speed_hz = dev->spi_speed;
-    spi[0].bits_per_word = dev->spi_bit_p_word;
-    spi[0].cs_change = 0;
-
-    spi[1].tx_buf = 0;
-    spi[1].rx_buf = (unsigned long)data;
-    spi[1].len = 3;
-    spi[1].delay_usecs = 0;
-    spi[1].speed_hz = dev->spi_speed;
-    spi[1].bits_per_word = dev->spi_bit_p_word;
-    spi[1].cs_change = 0;
+    spi.tx_buf = 0;
+    spi.rx_buf = (unsigned long)data;
+    spi.len = 3;
+    spi.delay_usecs = 0;
+    spi.speed_hz = dev->spi_speed;
+    spi.bits_per_word = dev->spi_bit_p_word;
+    spi.cs_change = 0;
 
     ads125xSendCMD(dev, ADS1256_CMD_RDATAC);
     // ads1256waitDRDY(dev->pin_DRDY_line);
@@ -493,12 +484,12 @@ void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times)
     //     FailurePrint("Send command error: %s\n", strerror(errno));
     for (i = 0; i < times; ++i)
     {
-        spi[1].rx_buf = (unsigned long)(data + 3 * i);
+        spi.rx_buf = (unsigned long)(data + 3 * i);
         ads1256waitDRDY(dev->pin_DRDY_line);
         // while ((g = gpiod_line_get_value(dev->pin_DRDY_line)))
         //     if (g == -1)
         //         exit(1);
-        if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi[1]) < 0)
+        if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
             FailurePrint("RDATAC error: %s\n", strerror(errno));
         // printf("time: %d\n", i);
     }
