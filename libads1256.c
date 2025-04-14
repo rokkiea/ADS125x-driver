@@ -80,11 +80,13 @@ int32_t convert_to_signed_24bit(const unsigned char *result)
  * ads125xGetGPIOLine - Get gpio line struct pointer
  * @chip: Target GPIO chip string.
  * @line: Target GPIO line number.
+ * @cp: Target GPIO chip pointer
+ * @lp: Target GPIO line pointer
  *
  * @return: return 0 is open chip and line successful.
  *          return 1 is open chip failed, return 2 is open line failed.
  */
-int ads125xGetGPIOLine(ads125x_dev *dev, char *chip, int line)
+int ads125xGetGPIOLine(char *chip, int line, struct gpiod_chip **cp, struct gpiod_line **lp)
 {
     struct gpiod_chip *c;
     struct gpiod_line *l;
@@ -95,14 +97,14 @@ int ads125xGetGPIOLine(ads125x_dev *dev, char *chip, int line)
         fprintf(stderr, "Cannot open %s .", chip);
         return 1;
     }
-    dev->ping_DRDY_chip = c;
+    *cp = c;
     if (!(l = gpiod_chip_get_line(c, line)))
     {
         fprintf(stderr, "Cannot open %s line %d .\n", chip, line);
         gpiod_chip_close(c);
         return 2;
     }
-    dev->pin_DRDY_line = l;
+    *lp = l;
     return 0;
 }
 
@@ -118,14 +120,46 @@ int ads125xGetGPIOLine(ads125x_dev *dev, char *chip, int line)
  */
 int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line)
 {
-    if (ads125xGetGPIOLine(dev, chip, line))
+    if (ads125xGetGPIOLine(chip, line, &(dev->pin_DRDY_chip), &(dev->pin_DRDY_line)))
     {
         fprintf(stderr, "Cannot open ADS1256 DRDY.\n");
         return 1;
     }
-    if ((gpiod_line_request_input(dev->pin_DRDY_line, "gpio_polling")) < 0)
+    if ((gpiod_line_request_input(dev->pin_DRDY_line, "ads125x-drdy")) < 0)
     {
         fprintf(stderr, "Cannot set DRDY to input mode.\n");
+        return 2;
+    }
+    return 0;
+}
+
+/**
+ * ads125xOpenPDWN - Open ADS1256 PDWN pin
+ * @dev: The ads125x dev info struct pointer.
+ * @chip: Target GPIO chip string.
+ * @line: Target GPIO line number.
+ * @init_status: Init PDWN status, 0 is low, 1 is high.
+ *
+ * @return: 0 is open DRDY successful,
+ *          1 is open DRDY GPIO error,
+ *          2 is set DRDY direction error.
+ *          3 invalid init_status, only 0 or 1.
+ */
+int ads125xOpenPDWN(ads125x_dev *dev, char *chip, int line, uint8_t init_status)
+{
+    if (init_status & 0xFE)
+    {
+        fprintf(stderr, "Invalid init_status %d.\n", init_status);
+        return 3;
+    }
+    if (ads125xGetGPIOLine(chip, line, &(dev->pin_PDWN_chip), &(dev->pin_PDWN_line)))
+    {
+        fprintf(stderr, "Cannot open ADS1256 PDWN.\n");
+        return 1;
+    }
+    if ((gpiod_line_request_output(dev->pin_PDWN_line, "ads125x-pdwn", init_status)) < 0)
+    {
+        fprintf(stderr, "Cannot set DRDY to output mode.\n");
         return 2;
     }
     return 0;
@@ -137,9 +171,21 @@ int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line)
 void ads125xCloseDRDY(ads125x_dev *dev)
 {
     // gpiod_line_release(dev->pin_DRDY_line);
-    gpiod_chip_close(dev->ping_DRDY_chip);
+    gpiod_line_close_chip(dev->pin_DRDY_line);
     dev->pin_DRDY_line = NULL;
-    dev->ping_DRDY_chip = NULL;
+    dev->pin_DRDY_chip = NULL;
+    return;
+}
+
+/**
+ * ads125xClosePDWN - Close ADS1256 DRDY GPIO chip and line
+ */
+void ads125xClosePDWN(ads125x_dev *dev)
+{
+    // gpiod_line_release(dev->pin_DRDY_line);
+    gpiod_line_close_chip(dev->pin_PDWN_line);
+    dev->pin_PDWN_line = NULL;
+    dev->pin_PDWN_chip = NULL;
     return;
 }
 
@@ -441,9 +487,10 @@ void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times)
     spi[1].bits_per_word = dev->spi_bit_p_word;
     spi[1].cs_change = 0;
 
-    ads1256waitDRDY(dev->pin_DRDY_line);
-    if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
-        FailurePrint("Send command error: %s\n", strerror(errno));
+    ads125xSendCMD(dev, ADS1256_CMD_RDATAC);
+    // ads1256waitDRDY(dev->pin_DRDY_line);
+    // if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
+    //     FailurePrint("Send command error: %s\n", strerror(errno));
     for (i = 0; i < times; ++i)
     {
         spi[1].rx_buf = (unsigned long)(data + 3 * i);
@@ -457,4 +504,23 @@ void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times)
     }
     ads125xSendCMD(dev, ADS1256_CMD_SDATAC);
     return;
+}
+
+/**
+ * ads125xSetPDWN - Set ADS1256 PDWN
+ * @dev: The ads125x dev info struct pointer.
+ * @status: PDWN status, 0 is low, 1 is high.
+ *
+ * @return: 1 is Invalid status.
+ *          2 is set gpio line value failed.
+ */
+int ads125xSetPDWN(ads125x_dev *dev, uint8_t status)
+{
+    if (status & 0xFE)
+    {
+        fprintf(stderr, "Invalid status %d.\n", status);
+        return 1;
+    }
+    // printf("a\n");
+    return (gpiod_line_set_value(dev->pin_PDWN_line, status));
 }

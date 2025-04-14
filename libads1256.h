@@ -43,14 +43,18 @@ typedef struct ads125x_dev_struct
     uint8_t spi_bit_p_word;
     int spi_speed;
 
-    struct gpiod_chip *ping_DRDY_chip;
+    struct gpiod_chip *pin_DRDY_chip;
     struct gpiod_line *pin_DRDY_line;
+
+    struct gpiod_chip *pin_PDWN_chip;
+    struct gpiod_line *pin_PDWN_line;
 } ads125x_dev;
 
 int FailurePrint(const char *message, ...);
 int32_t convert_to_signed_24bit(const unsigned char *result);
-int ads125xGetGPIOLine(ads125x_dev *dev, char *chip, int line);
+int ads125xGetGPIOLine(char *chip, int line, struct gpiod_chip **cp, struct gpiod_line **lp);
 int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line);
+int ads125xOpenPDWN(ads125x_dev *dev, char *chip, int line, uint8_t init_status);
 void ads125xCloseDRDY(ads125x_dev *dev);
 void ads1256waitDRDY(struct gpiod_line *line);
 int SPISetup(const int channel, const int port, const int speed, const int spiBPW, const int mode);
@@ -63,6 +67,8 @@ void ads125xRREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const u
 void ads125xWREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const uint8_t len);
 void ads125xRDATA(ads125x_dev *dev, uint8_t *data);
 void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times);
+int ads125xSetPDWN(ads125x_dev *dev, uint8_t status);
+
 // void ads125xSELFCAL(ads125x_dev *dev);
 // void ads125xSELFOCAL(ads125x_dev *dev);
 // void ads125xSELFGCAL(ads125x_dev *dev);
