@@ -24,27 +24,42 @@ For details of ADS1256, see: [TI ADS1256](https://www.ti.com/product/ADS1256), [
 * Assuming your environment is an Orange Pi 5 Pro running the Debian 12 distribution.
 
 1. Install `git`, `make`, `gcc`, and `libgpiod-dev`
+    
     `sudo apt install git make gcc libgpiod-dev`
+
 2. Clone this repository
+
     `git clone https://github.com/rokkiea/ADS125x-driver.git`
+
 3. Change to the repository directory and compile.
+
     ```shell
     cd ADS125x-driver
     make
     ```
+
 4. The compiled output is `ads1256`.
 
 ## Example Usage
 
 - Perform a single conversion.
+
     `./ads1256 -s`
+
 - Perform 100 continuous conversions.
+
     `./ads1256 -c 100`
+
 - Continuous conversions can be output to a file.
+
     `./ads1256 -c 100 -o output.csv`
+
 - The PDWN pin level can be set.
+
     `./ads1256 -p off`
+
 - You can also view the usage directly in the program.
+
     ```shell
     $ ./ads1256 -h
     ./ads1256: Usage: [options...] -h, --help                 Show this manual

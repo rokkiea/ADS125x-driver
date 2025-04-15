@@ -23,27 +23,42 @@
 * 假设您的环境为运行 Debian 12 发行版的香橙派 5 Pro。
 
 1. 安装 `git`, `make`, `gcc`, 和 `libgpiod-dev`
+
     `sudo apt install git make gcc libgpiod-dev`
+
 2. 克隆本仓库
+
     `git clone https://github.com/rokkiea/ADS125x-driver.git`
+
 3. 切换至仓库目录并编译
+
     ```shell
     cd ADS125x-driver
     make
     ```
+
 4. 编译输出为 `ads1256`
 
 ## 使用示例
 
 - 进行一次单次采样
+
     `./ads1256 -s`
+
 - 进行 100 次连续采样
+
     `./ads1256 -c 100`
+
 - 进行连续采样并输出到文件
+
     `./ads1256 -c 100 -o output.csv`
+
 - 也可以设置 `PDWN` 引脚电平
+
     `./ads1256 -p off`
+
 - 您也可以在程序中直接查看用法
+
     ```shell
     $ ./ads1256 -h
     ./ads1256: Usage: [options...] -h, --help                 Show this manual
