@@ -47,6 +47,8 @@
 #include "libads1256reg.h"
 #include "libads1256.h"
 
+int ADS125xDriverDebug = false;
+
 int FailurePrint(const char *message, ...)
 {
     va_list argp;
@@ -103,6 +105,8 @@ int ads125xGetGPIOLine(char *chip, int line, struct gpiod_chip **cp, struct gpio
         return 2;
     }
     *lp = l;
+    if (ADS125xDriverDebug)
+        fprintf(stdout, "Open GPIO chip: %s line %d .\n", chip, line);
     return 0;
 }
 
@@ -128,6 +132,8 @@ int ads125xOpenDRDY(ads125x_dev *dev, char *chip, int line)
         fprintf(stderr, "Cannot set DRDY to input mode.\n");
         return 2;
     }
+    if (ADS125xDriverDebug)
+        fprintf(stdout, "Open DRDY at %s line %d.\n", chip, line);
     return 0;
 }
 
@@ -160,6 +166,8 @@ int ads125xOpenPDWN(ads125x_dev *dev, char *chip, int line, uint8_t init_status)
         fprintf(stderr, "Cannot set DRDY to output mode.\n");
         return 2;
     }
+    if (ADS125xDriverDebug)
+        fprintf(stdout, "Open PDWN at %s line %d status %d.\n", chip, line, init_status);
     return 0;
 }
 
@@ -172,6 +180,9 @@ void ads125xCloseDRDY(ads125x_dev *dev)
     gpiod_line_close_chip(dev->pin_DRDY_line);
     dev->pin_DRDY_line = NULL;
     dev->pin_DRDY_chip = NULL;
+    if (ADS125xDriverDebug)
+        fprintf(stdout, "Close DRDY.\n");
+
     return;
 }
 
@@ -184,6 +195,8 @@ void ads125xClosePDWN(ads125x_dev *dev)
     gpiod_line_close_chip(dev->pin_PDWN_line);
     dev->pin_PDWN_line = NULL;
     dev->pin_PDWN_chip = NULL;
+    if (ADS125xDriverDebug)
+        fprintf(stdout, "Close PDWN.\n");
     return;
 }
 
@@ -206,10 +219,11 @@ void ads125xwaitDRDY(struct gpiod_line *line)
 int SPISetup(const int channel, const int port, const int speed, const int spiBPW, const int mode)
 {
     int fd;
-    static char spidev[14];
+    static char spidev[17];
 
     sprintf(spidev, "/dev/spidev%i.%i", channel, port);
-    fprintf(stdout, "Opening device %s with speed: %d, mode: %d, spiBPW: %d\n", spidev, speed, mode, spiBPW);
+    if (ADS125xDriverDebug)
+        fprintf(stdout, "Opening device %s with speed: %d, mode: %d, spiBPW: %d\n", spidev, speed, mode, spiBPW);
 
     // Get SPI dev descriptors
     if ((fd = open(spidev, O_RDWR)) < 0)
@@ -238,7 +252,8 @@ int SPIRelease(const int fd)
 {
     if (!close(fd))
     {
-        fprintf(stdout, "Close SPI descriptors success.\n");
+        if (ADS125xDriverDebug)
+            fprintf(stdout, "Close SPI descriptors success.\n");
         return 0;
     }
     return 1;
