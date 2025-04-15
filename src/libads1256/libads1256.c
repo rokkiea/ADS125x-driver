@@ -300,7 +300,6 @@ void ads125xSetMUX(ads125x_dev *dev, const uint8_t psel, const uint8_t nsel)
 void ads125xSetDRATE(ads125x_dev *dev, const uint8_t dr)
 {
     uint8_t spiTxData[3] = {0};
-    int ret;
     struct spi_ioc_transfer spi;
 
     memset(&spi, 0, sizeof(spi));
@@ -339,7 +338,6 @@ void ads125xSetDRATE(ads125x_dev *dev, const uint8_t dr)
 void ads125xSendCMD(ads125x_dev *dev, const uint8_t cmd)
 {
     uint8_t spiTxData = cmd;
-    int ret, v;
     struct spi_ioc_transfer spi;
 
     memset(&spi, 0, sizeof(spi));
@@ -371,7 +369,6 @@ void ads125xSendCMD(ads125x_dev *dev, const uint8_t cmd)
 void ads125xRREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const uint8_t len)
 {
     uint8_t *spiTxData = (uint8_t *)malloc(len + 3);
-    int ret;
     struct spi_ioc_transfer spi[2];
 
     if (len > 0x0A || len < 1)
@@ -423,7 +420,6 @@ void ads125xRREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const u
 void ads125xWREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const uint8_t len)
 {
     uint8_t *spiTxData = (uint8_t *)malloc(len + 2);
-    int ret;
     struct spi_ioc_transfer spi;
 
     if (len > 0x0A)
@@ -535,7 +531,8 @@ void ads125xRDATAC(ads125x_dev *dev, uint8_t *data, int times)
  * @dev: The ads125x dev info struct pointer.
  * @status: PDWN status, 0 is low, 1 is high.
  *
- * @return: 1 is Invalid status.
+ * @return: 0 success
+ *          1 is Invalid status.
  *          2 is set gpio line value failed.
  */
 int ads125xSetPDWN(ads125x_dev *dev, uint8_t status)
@@ -545,6 +542,5 @@ int ads125xSetPDWN(ads125x_dev *dev, uint8_t status)
         fprintf(stderr, "Invalid status %d.\n", status);
         return 1;
     }
-    // printf("a\n");
     return (gpiod_line_set_value(dev->pin_PDWN_line, status));
 }
