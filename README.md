@@ -60,7 +60,7 @@ For details of ADS1256, see: [TI ADS1256](https://www.ti.com/product/ADS1256), [
 
 - You can also view the usage directly in the program.
 
-    ```shell
+    ```TEXT
     $ ./ads1256 -h
     ./ads1256: Usage: [options...] -h, --help                 Show this manual
     -s, --single               Single read

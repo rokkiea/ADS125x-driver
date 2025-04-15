@@ -59,7 +59,7 @@
 
 - 您也可以在程序中直接查看用法
 
-    ```shell
+    ```TEXT
     $ ./ads1256 -h
     ./ads1256: Usage: [options...] -h, --help                 Show this manual
     -s, --single               Single read
