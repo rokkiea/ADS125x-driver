@@ -333,7 +333,7 @@ void ads125xSetDRATE(ads125x_dev *dev, const uint8_t dr)
  * facilitating operations such as wake-up, calibration, and reset.
  * Commands are macro-defined with the `ADS125x_CMD_` prefix.
  *
- * **WARN**: DO NOT USE THIS FUNCTION SEND RDATA/RRED/WREG COMMAND.
+ * **WARN**: DO NOT USE THIS FUNCTION SEND RDATA/RRED/WREG/RESET COMMAND.
  */
 void ads125xSendCMD(ads125x_dev *dev, const uint8_t cmd)
 {
@@ -393,7 +393,7 @@ void ads125xRREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const u
     // Received data
     spi[1].tx_buf = (unsigned long)spiTxData + 2;
     spi[1].rx_buf = (unsigned long)data;
-    spi[1].len = (len - 1);
+    spi[1].len = len;
     spi[1].delay_usecs = 0;
     spi[1].speed_hz = dev->spi_speed;
     spi[1].bits_per_word = dev->spi_bit_p_word;
@@ -460,11 +460,12 @@ void ads125xWREG(ads125x_dev *dev, const uint8_t regaddr, uint8_t *data, const u
  */
 void ads125xRDATA(ads125x_dev *dev, uint8_t *data)
 {
-    uint8_t spiTxData = ADS125x_CMD_RDATA;
-    struct spi_ioc_transfer spi[2];
+    uint8_t spiTxData[4] = {0};
+    struct spi_ioc_transfer spi[4];
 
     memset(&spi, 0, sizeof(spi));
-    // Send RDATA command
+    // SYNC
+    spiTxData[0] = ADS125x_CMD_SYNC;
     spi[0].tx_buf = (unsigned long)&spiTxData;
     spi[0].rx_buf = 0;
     spi[0].len = 1;
@@ -472,16 +473,42 @@ void ads125xRDATA(ads125x_dev *dev, uint8_t *data)
     spi[0].speed_hz = dev->spi_speed;
     spi[0].bits_per_word = dev->spi_bit_p_word;
     spi[0].cs_change = 0;
-    // Received data
-    spi[1].tx_buf = 0;
-    spi[1].rx_buf = (unsigned long)data;
-    spi[1].len = 3;
-    spi[1].delay_usecs = 0;
+    // WAKEUP
+    spiTxData[1] = ADS125x_CMD_WAKEUP;
+    spi[1].tx_buf = (unsigned long)&spiTxData[1];
+    spi[1].rx_buf = 0;
+    spi[1].len = 1;
+    spi[1].delay_usecs = 4;
     spi[1].speed_hz = dev->spi_speed;
     spi[1].bits_per_word = dev->spi_bit_p_word;
     spi[1].cs_change = 0;
+    // Send RDATA command
+    spiTxData[2] = ADS125x_CMD_RDATA;
+    spi[2].tx_buf = (unsigned long)&spiTxData[2];
+    spi[2].rx_buf = 0;
+    spi[2].len = 1;
+    spi[2].delay_usecs = 4;
+    spi[2].speed_hz = dev->spi_speed;
+    spi[2].bits_per_word = dev->spi_bit_p_word;
+    spi[2].cs_change = 0;
+    // Received data
+    spi[3].tx_buf = 0;
+    spi[3].rx_buf = (unsigned long)data;
+    spi[3].len = 3;
+    spi[3].delay_usecs = 0;
+    spi[3].speed_hz = dev->spi_speed;
+    spi[3].bits_per_word = dev->spi_bit_p_word;
+    spi[3].cs_change = 0;
 
-    if (ioctl(dev->fd, SPI_IOC_MESSAGE(2), &spi) < 0)
+    // ads125xwaitDRDY(dev->pin_DRDY_line);
+    if (ioctl(dev->fd, SPI_IOC_MESSAGE(4), &spi) < 0)
+        FailurePrint("RDATA error: %s\n", strerror(errno));
+
+    ads125xwaitDRDY(dev->pin_DRDY_line);
+    spiTxData[0] = ADS125x_CMD_STANDBY;
+    spi[0].tx_buf = (unsigned long)&spiTxData;
+    spi[0].delay_usecs = 0;
+    if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
         FailurePrint("RDATA error: %s\n", strerror(errno));
     return;
 }
@@ -543,4 +570,24 @@ int ads125xSetPDWN(ads125x_dev *dev, uint8_t status)
         return 1;
     }
     return (gpiod_line_set_value(dev->pin_PDWN_line, status));
+}
+
+void ads125xRESET(ads125x_dev *dev)
+{
+    uint8_t spiTxData = ADS125x_CMD_RESET;
+    struct spi_ioc_transfer spi;
+
+    memset(&spi, 0, sizeof(spi));
+
+    spi.tx_buf = (unsigned long)&spiTxData;
+    spi.rx_buf = 0;
+    spi.len = 1;
+    spi.delay_usecs = 0;
+    spi.speed_hz = dev->spi_speed;
+    spi.bits_per_word = dev->spi_bit_p_word;
+    spi.cs_change = 0;
+
+    if (ioctl(dev->fd, SPI_IOC_MESSAGE(1), &spi) < 0)
+        FailurePrint("Send command error: %s\n", strerror(errno));
+    return;
 }
