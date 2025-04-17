@@ -61,11 +61,12 @@
 
     ```TEXT
     $ ./ads1256 -h
-    ./ads1256: Usage: [options...] -h, --help                 Show this manual
-    -s, --single               Single read
-    -c, --continuous <times>   Read data 'times' times in continuous mode.
-        -o, --output <file>    Write continuous mode data to a file
-    -p, --pdwn [off/on/0/1]    Set PDWN low (off/0) or high (on/1)
+    ./ads1256: Usage: [options...]
+     -h, --help                 Show this manual
+     -s, --single               Single read
+     -c, --continuous <times>   Read data 'times' times in continuous mode.
+         -o, --output <file>    Write continuous mode data to a file
+     -p, --pdwn [off/on/0/1]    Set PDWN low (off/0) or high (on/1)
 
     ads1256 homepage at: https://github.com/rokkiea/ADS125x-driver
     Copyright (c) 2025 Guo Ruijing (rokkiea)
