@@ -1,5 +1,5 @@
 /**
- * ads1256reg.h - TI ADS1256 driver
+ * libads1256reg.h - TI ADS1256 driver
  * 
  *	Extend wiringPi with the ADS1256 SPI 24-Bit ADC
  *	Copyright (c) 2025, Guo Ruijing (rokkiea) 

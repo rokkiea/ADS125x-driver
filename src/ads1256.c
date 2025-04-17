@@ -52,7 +52,7 @@
 #define DEV_SPI_BIT_P_WORD 8
 
 extern int ADS125xDriverDebug;
-char *usage = "Usage: [options...]"
+char *usage = "Usage: [options...]\n"
               " -h, --help                 Show this manual\n"
               " -s, --single               Single read\n"
               " -c, --continuous <times>   Read data 'times' times in continuous mode.\n"
@@ -99,7 +99,7 @@ void one_shot_read()
     ads125xSetPDWN(&ads1256, 1);
 
     // RESET ADS1256 to clean previous settings and status
-    ads125xSendCMD(&ads1256, ADS125x_CMD_RESET);
+    ads125xRESET(&ads1256);
     // Set data rate to 15000 sps
     ads125xSetDRATE(&ads1256, (uint8_t)ADS125x_DR_15000);
     // Set Multiplexer, the result will be V_CH0 - V_CH1
