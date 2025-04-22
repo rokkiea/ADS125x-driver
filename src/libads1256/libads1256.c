@@ -66,7 +66,7 @@ int FailurePrint(const char *message, ...)
 
 /**
  * convert_to_signed_24bit - Convert 24-bit data to signed int
- * @result: A unsigned char data arrays.
+ * @result: A int32_t value.
  */
 int32_t convert_to_signed_24bit(const unsigned char *result)
 {
@@ -84,7 +84,8 @@ int32_t convert_to_signed_24bit(const unsigned char *result)
  * @lp: Target GPIO line pointer
  *
  * @return: return 0 is open chip and line successful.
- *          return 1 is open chip failed, return 2 is open line failed.
+ *          return 1 is open chip failed
+ *          return 2 is open line failed.
  */
 int ads125xGetGPIOLine(char *chip, int line, struct gpiod_chip **cp, struct gpiod_line **lp)
 {
@@ -209,12 +210,15 @@ void ads125xwaitDRDY(struct gpiod_line *line)
         ;
     return;
 }
+
 /**
  * SPISetup - Set up a spi device
  * @channel: The bus to which the SPI device belongs.
  * @port: The device (chip select pin) number connected to this SPI bus.
  * @speed: Speed of the SPI device.
  * @mode: Clock Phase and Polarity
+ * 
+ * @return: return a SPI dev descriptors
  */
 int SPISetup(const int channel, const int port, const int speed, const int spiBPW, const int mode)
 {
@@ -240,6 +244,15 @@ int SPISetup(const int channel, const int port, const int speed, const int spiBP
     return fd;
 }
 
+/**
+ * ads125xSetup - Setup a ADS1256 device
+ * 
+ * @dev: The ads125x dev info struct pointer.
+ * @spiChannel: the SPI bus number
+ * @spiPort: the SPI port number
+ * 
+ * @return: return a SPI dev descriptors
+ */
 int ads125xSetup(ads125x_dev *dev, int spiChannel, int spiPort)
 {
     int fd;
@@ -248,6 +261,14 @@ int ads125xSetup(ads125x_dev *dev, int spiChannel, int spiPort)
     return fd;
 }
 
+/**
+ * SPIRelease - Release a SPI device
+ * 
+ * @fd: A SPI dev descriptors
+ * 
+ * @retrun: 0 is Close SPI descriptors success
+ *          1 is Close SPI descriptors failed
+ */
 int SPIRelease(const int fd)
 {
     if (!close(fd))
@@ -572,6 +593,11 @@ int ads125xSetPDWN(ads125x_dev *dev, uint8_t status)
     return (gpiod_line_set_value(dev->pin_PDWN_line, status));
 }
 
+/**
+ * ads125xRESET - Send RESET command to ADS1256
+ * 
+ * @dev: The ads125x dev info struct pointer.
+ */
 void ads125xRESET(ads125x_dev *dev)
 {
     uint8_t spiTxData = ADS125x_CMD_RESET;
