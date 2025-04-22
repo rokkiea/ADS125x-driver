@@ -73,6 +73,29 @@ For details of ADS1256, see: [TI ADS1256](https://www.ti.com/product/ADS1256), [
     Copyright (c) 2025 Guo Ruijing (rokkiea)
     ```
 
+## Performance Testing
+
+| Target Rate / SPS | Number of Samples | Elapsed Time / s | Actual Rate / SPS | Ratio to Target Rate / % |
+| -------- | ------ | ------ | -------- | --------- |
+| 30k      | 150000 | 5.4370 | 27588.74 | 91.9625   |
+| 15k      | 75000  | 5.0286 | 14914.69 | 99.4313   |
+| 7500     | 37500  | 4.9995 | 7500.750 | 100.0100  |
+| 3750     | 18750  | 4.9995 | 3750.375 | 100.0100  |
+| 2000     | 10000  | 4.9988 | 2000.480 | 100.0240  |
+| 1000     | 5000   | 4.9996 | 1000.080 | 100.0080  |
+| 500      | 2500   | 4.9993 | 500.0700 | 100.0140  |
+| 100      | 500    | 4.9993 | 100.0140 | 100.0140  |
+| 60       | 300    | 4.9993 | 60.0084  | 100.0140  |
+| 50       | 250    | 4.9993 | 50.8071  | 101.6142  |
+| 30       | 150    | 4.9993 | 30.0042  | 100.0140  |
+| 25       | 125    | 4.9993 | 25.0035  | 100.0140  |
+| 15       | 75     | 4.9993 | 15.0021  | 100.0140  |
+| 10       | 50     | 4.9993 | 10.0014  | 100.0140  |
+| 5        | 25     | 4.9993 | 5.0007   | 100.0140  |
+| 2.5      | 25     | 9.9989 | 2.5003   | 100.0120  |
+
+The driver encounters performance issues at rates greater than 15 kSPS. With the current implementation of the driver, this appears to be unresolvable. This is due to the inaccuracy of various sleep timing functions in Linux, which forces the driver to poll the DRDY status using `gpiod_line_get_value`. However, this also leads to near 100% CPU utilization during high-frequency RDATAC mode. Furthermore, user-space drivers are generally subject to resource contention with other programs and are affected by the operating system scheduler. Therefore, this driver is not suitable for scenarios with extremely high demands for both sampling rate and accuracy.
+
 ## License
 
 Copyright (c) 2025, Guo Ruijing (rokkiea)
